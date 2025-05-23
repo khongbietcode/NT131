@@ -10,14 +10,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
-    <!-- Navbar (same as menu.html) -->
-    
     <div class="container mt-4">
         <div class="row">
             <div class="col-md-12 mb-4">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Thêm Người Dùng Mới</h5>
+                        <h5 class="card-title">Thêm Nhân Viên Mới</h5>
                         
                         {% if messages %}
                             {% for message in messages %}
@@ -31,8 +29,18 @@
                             {% csrf_token %}
                             <div class="row">
                                 <div class="col-md-6 mb-3">
+                                    <label for="user_id" class="form-label">ID</label>
+                                    <input type="text" class="form-control" id="user_id" name="user_id" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
                                     <label for="email" class="form-label">Email</label>
                                     <input type="email" class="form-control" id="email" name="email" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="username" class="form-label">Tên đăng nhập</label>
+                                    <input type="text" class="form-control" id="username" name="username" required>
                                 </div>
                             </div>
                             <div class="row">
@@ -49,12 +57,12 @@
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="is_admin" name="is_admin">
                                     <label class="form-check-label" for="is_admin">
-                                        Quyền admin
+                                        Quyền quản lý
                                     </label>
                                 </div>
                             </div>
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-user-plus"></i> Thêm người dùng
+                                <i class="fas fa-user-plus"></i> Thêm 
                             </button>
                         </form>
                     </div>
@@ -71,8 +79,9 @@
                                 <thead>
                                     <tr>
                                         <th>ID</th>
+                                        <th>Tên nhân viên</th>
                                         <th>Email</th>
-                                        <th>Quyền admin</th>
+                                        <th>Quyền quản lý</th>
                                         <th>Ngày tạo</th>
                                         <th>Thao tác</th>
                                     </tr>
@@ -81,12 +90,13 @@
                                     {% for user in users %}
                                     <tr>
                                         <td>{{ user.id }}</td>
+                                        <td>{{ user.username }}</td>
                                         <td>{{ user.email }}</td>
                                         <td>
                                             {% if user.is_superuser %}
-                                                <span class="badge bg-success">Admin</span>
+                                                <span class="badge bg-success">Quản lý</span>
                                             {% else %}
-                                                <span class="badge bg-secondary">User</span>
+                                                <span class="badge bg-secondary">Nhân viên</span>
                                             {% endif %}
                                         </td>
                                         <td>{{ user.date_joined|date:"d/m/Y" }}</td>

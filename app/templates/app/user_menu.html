@@ -14,7 +14,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
-                <i class="fas fa-home"></i> Trang Chủ
+                <i class="fas fa-tasks-alt"></i> Hệ Thống Quản Lý
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -22,6 +22,17 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" 
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user"></i> {{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="{% url 'personal_info' %}">
+                                <i class="fas fa-user-edit"></i> Thông tin cá nhân</a>
+                            </li>
+                            <li><a class="dropdown-item" href="{% url 'change_password' %}">
+                                <i class="fas fa-key"></i> Đổi mật khẩu</a>
+                            </li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item text-danger" href="{% url 'logout' %}">
                                 <i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
@@ -33,24 +44,11 @@
         </div>
     </nav>
 
+
     <!-- Main Content -->
     <div class="container mt-4">
         <!-- User Functions -->
         <div class="row">
-            <!-- Personal Information -->
-            <div class="col-md-6 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            <i class="fas fa-user"></i> Thông Tin Cá Nhân
-                        </h5>
-                        <p class="card-text">Xem và cập nhật thông tin cá nhân</p>
-                        <a href="#" class="btn btn-primary">
-                            <i class="fas fa-arrow-right"></i> Truy cập
-                        </a>
-                    </div>
-                </div>
-            </div>
             <!-- Reports -->
             <div class="col-md-6 mb-4">
                 <div class="card">

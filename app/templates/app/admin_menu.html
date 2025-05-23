@@ -30,10 +30,10 @@
                             <i class="fas fa-user"></i> {{ user.username }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                            <li><a class="dropdown-item" href="#">
+                            <li><a class="dropdown-item" href="{% url 'personal_info' %}">
                                 <i class="fas fa-user-edit"></i> Thông tin cá nhân</a>
                             </li>
-                            <li><a class="dropdown-item" href="#">
+                            <li><a class="dropdown-item" href="{% url 'change_password' %}">
                                 <i class="fas fa-key"></i> Đổi mật khẩu</a>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item text-danger" href="{% url 'logout' %}">
@@ -101,22 +101,7 @@
                             <i class="fas fa-chart-bar"></i> Báo Cáo Thống Kê
                         </h5>
                         <p class="card-text">Xem báo cáo và thống kê </p>
-                        <a href="#" class="btn btn-primary">
-                            <i class="fas fa-arrow-right"></i> Truy cập
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Settings -->
-            <div class="col-md-6 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            <i class="fas fa-cog"></i> Cài Đặt Hệ Thống
-                        </h5>
-                        <p class="card-text">Thiết lập và cấu hình hệ thống</p>
-                        <a href="#" class="btn btn-primary">
+                        <a href="{% url 'report' %}" class="btn btn-primary">
                             <i class="fas fa-arrow-right"></i> Truy cập
                         </a>
                     </div>
