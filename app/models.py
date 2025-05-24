@@ -8,7 +8,7 @@ class CardEvent(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     created_at = models.DateTimeField(default=timezone.now)
     def __str__(self):
-        return f"{self.card_id} - {self.created_at}"
+        return self.card_id
 
 class CardUser(models.Model):
     card_id = models.CharField(max_length=64, unique=True)

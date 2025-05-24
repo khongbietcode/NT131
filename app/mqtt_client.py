@@ -51,8 +51,6 @@ def on_message(client, userdata, msg):
         
             CardEvent.objects.create(
                 card_id=card_id,
-                created_at=timezone.now()
-                
             )
             async_to_sync(channel_layer.group_send)(
                 'esp32_data',
