@@ -40,6 +40,30 @@
             </tbody>
         </table>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+        const socket = new WebSocket("wss://" + window.location.host + "/ws/esp32/");
+
+    socket.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+    console.log("📡 Dữ liệu realtime:", data);
+
+    const tableBody = document.querySelector("table tbody");
+
+    const newRow = document.createElement("tr");
+
+    newRow.innerHTML = `
+        <td>${data.card_id || 'N/A'}</td>
+        <td>${data.timestamp || 'N/A'}</td>
+        <td>${new Date().toLocaleString('vi-VN')}</td>
+    `;
+                    
+    // Thêm vào đầu bảng (dòng mới nhất trên đầu)
+    tableBody.prepend(newRow);
+};
+
+socket.onerror = function(error) {
+    console.error("WebSocket error:", error);
+};
+    </script>
 </body>
 </html> 
