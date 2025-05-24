@@ -6,9 +6,9 @@ from django.contrib.auth.models import User
 class CardEvent(models.Model):
     card_id = models.CharField(max_length=64)
     timestamp = models.DateTimeField(auto_now_add=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now)
     def __str__(self):
-        return self.card_id
+        return f"{self.card_id} - {self.created_at}"
 
 class CardUser(models.Model):
     card_id = models.CharField(max_length=64, unique=True)
