@@ -227,3 +227,8 @@ def get_esp32_message(request):
 def report_view(request):
     events = CardEvent.objects.order_by('-created_at')[:50]
     return render(request, 'app/report.html', {'events': events})
+
+@login_required
+def clear_events(request):
+    CardEvent.objects.all().delete()
+    return redirect('report')

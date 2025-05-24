@@ -17,4 +17,5 @@ urlpatterns = [
     path('send-to-esp32/', views.send_to_esp32, name='send_to_esp32'),
     path('get-esp32-message/', views.get_esp32_message, name='get_esp32_message'),
     path('bao-cao-thong-ke/', views.report_view, name='report'),
+    path('clear-events/', views.clear_events, name='clear_events'),
 ]
