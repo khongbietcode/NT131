@@ -31,7 +31,7 @@
                 {% for event in events %}
                 <tr>
                     <td>{{ event.card_id }}</td>
-                    <td>{{ event.user_name }}</td>
+                    <td>{{ event.user.username|default:"Unknown User" }}</td>
                     <td>{{ event.created_at|date:'d/m/Y H:i:s' }}</td>
                 </tr>
                 {% empty %}

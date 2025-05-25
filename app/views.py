@@ -224,7 +224,7 @@ def get_esp32_message(request):
 
 @login_required
 def report_view(request):
-    events = CardEvent.objects.order_by('-created_at')[:50]
+    events = CardEvent.objects.select_related('user').order_by('-created_at')[:50]
     return render(request, 'app/report.html', {'events': events})
 
 @login_required
