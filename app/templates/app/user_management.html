@@ -10,6 +10,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'user_menu' %}">
+                <i class="fas fa-arrow-left"></i> Quay lại
+            </a>
+        </div>
+    </nav>
     <div class="container mt-4">
         <div class="row">
             <div class="col-md-12 mb-4">
@@ -30,7 +37,7 @@
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="user_id" class="form-label">ID</label>
-                                    <input type="text" class="form-control" id="user_id" name="user_id" required>
+                                    <input type="text" class="form-control" id="custom_card_id" name="custom_card_id">
                                 </div>
                             </div>
                             <div class="row">
@@ -39,7 +46,7 @@
                                     <input type="email" class="form-control" id="email" name="email" required>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label for="username" class="form-label">Tên đăng nhập</label>
+                                    <label for="username" class="form-label">Tên Nhân Viên</label>
                                     <input type="text" class="form-control" id="username" name="username" required>
                                 </div>
                             </div>
@@ -78,7 +85,7 @@
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th>ID</th>
+                                        <th>Card ID</th>
                                         <th>Tên nhân viên</th>
                                         <th>Email</th>
                                         <th>Quyền quản lý</th>
@@ -89,7 +96,7 @@
                                 <tbody>
                                     {% for user in users %}
                                     <tr>
-                                        <td>{{ user.id }}</td>
+                                        <td>{{ user.carduser.card_id|default:"N/A" }}</td>
                                         <td>{{ user.username }}</td>
                                         <td>{{ user.email }}</td>
                                         <td>
@@ -104,7 +111,7 @@
                                             <a href="{% url 'edit_user' user.id %}" class="btn btn-sm btn-warning">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <button class="btn btn-sm btn-danger" onclick="deleteUser({{ user.id }})">
+                                            <button class="btn btn-sm btn-danger" onclick="deleteUser('{{ user.id }}')">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </td>

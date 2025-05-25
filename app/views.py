@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 import app.mqtt_client 
 from django.http import JsonResponse
 from app.mqtt_client import publish_message
-from app.models import CardEvent
+from app.models import CardEvent, CardUser
 
 # Store the latest received MQTT message (for demo)
 latest_esp32_message = None
@@ -67,12 +67,12 @@ def user_menu(request):
 @user_passes_test(is_admin)
 def user_management(request):
     if request.method == 'POST':
-        user_id = request.POST.get('user_id')
         username = request.POST.get('username')
         email = request.POST.get('email')
         password = request.POST.get('password')
         confirm_password = request.POST.get('confirm_password')
         is_admin = request.POST.get('is_admin') == 'on'
+        custom_card_id = request.POST.get('custom_card_id')
 
         if password != confirm_password:
             messages.error(request, 'Mật khẩu không khớp')
@@ -87,33 +87,32 @@ def user_management(request):
                 messages.error(request, 'Email đã tồn tại')
                 return redirect('user_management')
             
-            if user_id:
-                if User.objects.filter(id=user_id).exists():
-                    messages.error(request, 'ID đã tồn tại')
-                    return redirect('user_management')
-                user = User(id=user_id, username=username, email=email)
-                user.set_password(password)
-                user.save()
-            else:
-                user = User.objects.create_user(
-                    username=username,
-                    email=email,
-                    password=password
-                )
+            if custom_card_id and CardUser.objects.filter(card_id=custom_card_id).exists():
+                messages.error(request, f'Card ID {custom_card_id} đã tồn tại.')
+                return redirect('user_management')
+            
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password
+            )
+
+            if custom_card_id:
+                CardUser.objects.create(user=user, card_id=custom_card_id)
 
             if is_admin:
                 user.is_superuser = True
                 user.is_staff = True
                 user.save()
 
-            messages.success(request, 'Tạo nhân viên thành công')
+            messages.success(request, 'Tạo nhân viên và Card ID thành công')
             return redirect('user_management')
 
         except Exception as e:
             messages.error(request, f'Lỗi: {str(e)}')
             return redirect('user_management')
 
-    users = User.objects.all().order_by('-date_joined')
+    users = User.objects.all().select_related('carduser').order_by('-date_joined')
     return render(request, 'app/user_management.html', {'users': users})
 
 @login_required
