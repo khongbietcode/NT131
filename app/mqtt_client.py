@@ -39,6 +39,7 @@ def on_message(client, userdata, msg):
         payload = json.loads(data)
         card_id = payload.get('card_id')
         user_name = "Unknown User" 
+        card_user = None  # Initialize card_user to None
         if card_id:
             try:
                 card_user = CardUser.objects.select_related('user').get(card_id=card_id)
