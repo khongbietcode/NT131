@@ -131,3 +131,11 @@ CHANNEL_LAYERS = {
         'BACKEND': 'channels.layers.InMemoryChannelLayer',
     },
 }
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'           
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'taivophat1509@gmail.com'    # Email gửi đi
+EMAIL_HOST_PASSWORD = 'pnbx sccd phyr mjmf'   # App password (không phải mật khẩu Gmail thông thường)
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

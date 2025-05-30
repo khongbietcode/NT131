@@ -18,4 +18,8 @@ urlpatterns = [
     path('get-esp32-message/', views.get_esp32_message, name='get_esp32_message'),
     path('bao-cao-thong-ke/', views.report_view, name='report'),
     path('clear-events/', views.clear_events, name='clear_events'),
+    path('personal-attendance-setting/', views.personal_attendance_setting_view, name='personal_attendance_setting'),
+    path('edit-personal-attendance-setting/<int:setting_id>/', views.edit_personal_attendance_setting, name='edit_personal_attendance_setting'),
+    path('delete-personal-attendance-setting/<int:setting_id>/', views.delete_personal_attendance_setting, name='delete_personal_attendance_setting'),
+    path('my-attendance-settings/', views.my_attendance_settings, name='my_attendance_settings'),
 ]

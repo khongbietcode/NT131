@@ -6,7 +6,14 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 import app.mqtt_client 
 from django.http import JsonResponse
 from app.mqtt_client import publish_message
-from app.models import CardEvent, CardUser
+from app.models import CardEvent, CardUser, PersonalAttendanceSetting
+from .forms import  PersonalAttendanceSettingForm
+from datetime import datetime
+from django.core.mail import send_mail
+import secrets
+import string
+
+
 
 # Store the latest received MQTT message (for demo)
 latest_esp32_message = None
@@ -63,14 +70,18 @@ def user_menu(request):
     }
     return render(request, 'app/user_menu.html', context)
 
+def generate_random_password(length=10):
+    chars = string.ascii_letters + string.digits
+    return ''.join(secrets.choice(chars) for _ in range(length))
+
 @login_required
 @user_passes_test(is_admin)
 def user_management(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         email = request.POST.get('email')
-        password = request.POST.get('password')
-        confirm_password = request.POST.get('confirm_password')
+        password = generate_random_password()      # Sinh ngẫu nhiên
+        confirm_password = password                # Để luôn đúng
         is_admin = request.POST.get('is_admin') == 'on'
         custom_card_id = request.POST.get('custom_card_id')
 
@@ -104,6 +115,34 @@ def user_management(request):
                 user.is_superuser = True
                 user.is_staff = True
                 user.save()
+
+            # Gửi mail thông báo
+            send_mail(
+                'Tài khoản mới đã được tạo',
+                '',  # Để trống nếu chỉ gửi HTML
+                None,
+                [email],
+                fail_silently=False,
+                html_message=f"""
+                <html>
+                <body style="font-family: Arial, sans-serif; background: #f6f6f6; padding: 30px;">
+                    <div style="max-width: 500px; margin: auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #eee; padding: 24px;">
+                        <h2 style="color: #007bff;">Chào mừng bạn đến với công ty UIT!</h2>
+                        <p>Xin chào <b>{username}</b>,</p>
+                        <p>Tài khoản của bạn đã được tạo thành công với các thông tin sau:</p>
+                        <ul>
+                            <li><b>Tên Nhân Viên:</b> {username}</li>
+                            <li><b>Email:</b> {email}</li>
+                            <li><b>Mật khẩu:</b> {password}</li>
+                        </ul>
+                        <p>Vui lòng đăng nhập và đổi mật khẩu sau khi sử dụng lần đầu.</p>
+                        <hr>
+                        <p style="font-size: 13px; color: #888;">Đây là email tự động, vui lòng không trả lời email này.</p>
+                    </div>
+                </body>
+                </html>
+                """
+            )
 
             messages.success(request, 'Tạo nhân viên và Card ID thành công')
             return redirect('user_management')
@@ -224,10 +263,75 @@ def get_esp32_message(request):
 
 @login_required
 def report_view(request):
-    events = CardEvent.objects.select_related('user').order_by('-created_at')[:50]
-    return render(request, 'app/report.html', {'events': events})
+    events = CardEvent.objects.select_related('user').order_by('-created_at')
+    event_list = []
+    for event in events:
+        # Lấy cấu hình giờ điểm danh cá nhân nếu có
+        setting = PersonalAttendanceSetting.objects.filter(
+            user=event.user,
+            date=event.created_at.date()
+        ).first()
+        status = ''
+        if setting:
+            event_time = event.created_at.time()
+            if event_time < setting.checkin_time:
+                status = f"Sớm {str(datetime.combine(event.created_at.date(), setting.checkin_time) - event.created_at).split('.')[0]}"
+            elif event_time > setting.checkin_time:
+                status = f"Trễ {str(event.created_at - datetime.combine(event.created_at.date(), setting.checkin_time)).split('.')[0]}"
+            else:
+                status = "Đúng giờ"
+        else:
+            status = "Chưa có cài đặt"
+        event_list.append({
+            'card_id': event.card_id,
+            'user': event.user,
+            'created_at': event.created_at,
+            'status': status,
+        })
+    return render(request, 'app/report.html', {'events': event_list})
 
 @login_required
 def clear_events(request):
     CardEvent.objects.all().delete()
     return redirect('report')
+
+@login_required
+@user_passes_test(is_admin)
+def personal_attendance_setting_view(request):
+    settings = PersonalAttendanceSetting.objects.select_related('user').order_by('-date')
+    if request.method == 'POST':
+        form = PersonalAttendanceSettingForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Đã lưu cài đặt giờ điểm danh cá nhân.')
+            return redirect('personal_attendance_setting')
+    else:
+        form = PersonalAttendanceSettingForm()
+    return render(request, 'app/personal_attendance_setting.html', {'form': form, 'settings': settings})
+
+@login_required
+@user_passes_test(is_admin)
+def delete_personal_attendance_setting(request, setting_id):
+    setting = get_object_or_404(PersonalAttendanceSetting, id=setting_id)
+    setting.delete()
+    messages.success(request, 'Đã xóa cài đặt giờ điểm danh cá nhân.')
+    return redirect('personal_attendance_setting')
+
+@login_required
+@user_passes_test(is_admin)
+def edit_personal_attendance_setting(request, setting_id):
+    setting = get_object_or_404(PersonalAttendanceSetting, id=setting_id)
+    if request.method == 'POST':
+        form = PersonalAttendanceSettingForm(request.POST, instance=setting)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Đã cập nhật cài đặt giờ điểm danh cá nhân.')
+            return redirect('personal_attendance_setting')
+    else:
+        form = PersonalAttendanceSettingForm(instance=setting)
+    return render(request, 'app/edit_personal_attendance_setting.html', {'form': form, 'setting': setting})
+
+@login_required
+def my_attendance_settings(request):
+    settings = PersonalAttendanceSetting.objects.filter(user=request.user).order_by('-date')
+    return render(request, 'app/my_attendance_settings.html', {'settings': settings})
