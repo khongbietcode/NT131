@@ -3,9 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
-import app.mqtt_client 
 from django.http import JsonResponse
-from app.mqtt_client import publish_message
 from app.models import CardEvent, CardUser, PersonalAttendanceSetting
 from .forms import  PersonalAttendanceSettingForm
 from datetime import datetime
