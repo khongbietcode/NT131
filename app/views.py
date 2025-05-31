@@ -12,6 +12,7 @@ from datetime import datetime
 from django.core.mail import send_mail
 import secrets
 import string
+from django.utils import timezone
 
 
 
@@ -243,45 +244,52 @@ def change_password(request):
             return redirect('change_password')
     return render(request, 'app/change_password.html', {'user': user})
 
-def mqtt_message_handler(message):
-    global latest_esp32_message
-    latest_esp32_message = message
-
-# Example view to send data to ESP32
-@login_required
-def send_to_esp32(request):
-    if request.method == 'POST':
-        data = request.POST.get('data', 'Hello ESP32!')
-        publish_message('esp32/data', data)
-        return JsonResponse({'status': 'sent', 'data': data})
-    return render(request, 'app/send_to_esp32.html')
-
-# Example view to get the latest message from ESP32
-@login_required
-def get_esp32_message(request):
-    return JsonResponse({'latest_message': latest_esp32_message})
 
 @login_required
 def report_view(request):
     events = CardEvent.objects.select_related('user').order_by('-created_at')
     event_list = []
     for event in events:
-        # Lấy cấu hình giờ điểm danh cá nhân nếu có
-        setting = PersonalAttendanceSetting.objects.filter(
-            user=event.user,
-            date=event.created_at.date()
-        ).first()
-        status = ''
-        if setting:
-            event_time = event.created_at.time()
-            if event_time < setting.checkin_time:
-                status = f"Sớm {str(datetime.combine(event.created_at.date(), setting.checkin_time) - event.created_at).split('.')[0]}"
-            elif event_time > setting.checkin_time:
-                status = f"Trễ {str(event.created_at - datetime.combine(event.created_at.date(), setting.checkin_time)).split('.')[0]}"
+        try:
+            setting = PersonalAttendanceSetting.objects.filter(
+                user=event.user,
+                date=event.created_at.date()
+            ).first()
+            status = ''
+            if setting:
+                event_time = event.created_at.time()
+                # Chuyển event_dt về naive để phép trừ không lỗi
+                event_dt = event.created_at
+                if timezone.is_aware(event_dt):
+                    event_dt = event_dt.astimezone(timezone.get_current_timezone()).replace(tzinfo=None)
+                checkin_dt = datetime.combine(event_dt.date(), setting.checkin_time)
+
+                print(f"event_dt: {event_dt}, checkin_dt: {checkin_dt}, event_dt < checkin_dt: {event_dt < checkin_dt}, event_dt > checkin_dt: {event_dt > checkin_dt}")
+
+                if event_dt < checkin_dt:
+                    # Điểm danh sớm
+                    time_difference = checkin_dt - event_dt
+                    total_seconds = int(time_difference.total_seconds())
+                    hours = total_seconds // 3600
+                    minutes = (total_seconds % 3600) // 60
+                    seconds = total_seconds % 60
+                    status = f"Sớm {hours:02d}:{minutes:02d}:{seconds:02d}"
+                elif event_dt > checkin_dt:
+                    # Điểm danh trễ
+                    time_difference = event_dt - checkin_dt
+                    total_seconds = int(time_difference.total_seconds())
+                    hours = total_seconds // 3600
+                    minutes = (total_seconds % 3600) // 60
+                    seconds = total_seconds % 60
+                    status = f"Trễ {hours:02d}:{minutes:02d}:{seconds:02d}"
+                else:
+                    status = "Đúng giờ"
             else:
-                status = "Đúng giờ"
-        else:
-            status = "Chưa có cài đặt"
+                status = "Không có cấu hình"
+        except Exception as e:
+            print(f"Lỗi với event {event.id}: {e}")
+            status = "Lỗi xử lý"
+        
         event_list.append({
             'card_id': event.card_id,
             'user': event.user,

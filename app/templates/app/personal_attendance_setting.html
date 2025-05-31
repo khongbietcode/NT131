@@ -1,4 +1,3 @@
-
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -50,7 +49,7 @@
                 <tr>
                     <td>{{ s.user.get_full_name|default:s.user.username }}</td>
                     <td>{{ s.date|date:"d/m/Y" }}</td>
-                    <td>{{ s.checkin_time|time:"H:i" }}</td>
+                    <td>{{ s.checkin_time|time:"H:i" }} - {{ s.checkout_time|time:"H:i" }}</td>
                     <td>
                         <!-- Nút chỉnh sửa -->
                         <a href="{% url 'edit_personal_attendance_setting' s.id %}" class="btn btn-warning btn-sm" title="Chỉnh sửa">

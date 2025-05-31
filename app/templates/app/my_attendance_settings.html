@@ -30,7 +30,7 @@
                 {% for s in settings %}
                 <tr>
                     <td>{{ s.date|date:"d/m/Y" }}</td>
-                    <td>{{ s.checkin_time|time:"H:i" }}</td>
+                    <td>{{ s.checkin_time|time:"H:i" }} - {{ s.checkout_time|time:"H:i" }}</td>
                 </tr>
                 {% empty %}
                 <tr>

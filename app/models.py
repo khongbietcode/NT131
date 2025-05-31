@@ -22,7 +22,11 @@ class CardUser(models.Model):
 class PersonalAttendanceSetting(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateField()
-    checkin_time = models.TimeField()
+    checkin_time = models.TimeField(verbose_name="Giờ vào ca")
+    checkout_time = models.TimeField(verbose_name="Giờ ra ca")  
+
+    class Meta:
+        unique_together = ('user', 'date')
 
     def __str__(self):
-        return f"{self.user.username} - {self.date}: {self.checkin_time}"
+        return f"{self.user.username} - {self.date}: {self.checkin_time} - {self.checkout_time}"
