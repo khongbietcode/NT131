@@ -1,3 +1,5 @@
+import os
+import django
 import json
 import threading
 import paho.mqtt.client as mqtt
@@ -5,6 +7,11 @@ from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from datetime import datetime
 from django.utils import timezone
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'webquanly.settings')
+django.setup()
+
+from app.models import CardEvent, CardUser, PersonalAttendanceSetting
 
 MQTT_BROKER = 'ad66d2d5e34a426099f94af411e4ad88.s1.eu.hivemq.cloud' 
 MQTT_PORT = 8883 
@@ -29,7 +36,6 @@ def on_connect(client, userdata, flags, rc):
 
 def on_message(client, userdata, msg):
     print(f"on_message called. Topic: {msg.topic}, Payload: {msg.payload}")
-    from app.models import CardEvent, CardUser, PersonalAttendanceSetting
     data = msg.payload.decode()
     print(f'Received MQTT message: {data}')
     try:
@@ -117,3 +123,18 @@ def get_mqtt_client():
 def publish_message(topic, message):
     client = get_mqtt_client()
     client.publish(topic, message)
+
+def start_mqtt():
+    client = mqtt.Client()
+    
+    client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
+    
+    client.tls_set()
+    client.on_connect = on_connect
+    client.on_message = on_message
+    client.connect(MQTT_BROKER, MQTT_PORT, 60)
+    client.loop_forever()
+
+
+mqtt_thread = threading.Thread(target=start_mqtt, daemon=True)
+mqtt_thread.start()
