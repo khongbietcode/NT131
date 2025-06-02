@@ -25,8 +25,7 @@ MQTT_PASSWORD = 'Tai123123'
 # Sửa các topic theo đúng định dạng
 BASE_TOPIC = f"{MQTT_USERNAME}/"
 MQTT_TOPIC = f"{BASE_TOPIC}rfid/uid"
-ESP32_DATA_TOPIC = f"{BASE_TOPIC}esp32/data"
-ESP32_STATUS_TOPIC = f"{BASE_TOPIC}esp32/status"
+ESP32_STATUS_TOPIC = f"Taicute1234/esp32/status"
 
 channel_layer = get_channel_layer()
 
@@ -37,7 +36,6 @@ def on_connect(client, userdata, flags, rc):
     if rc == 0:
         print('Connected successfully to MQTT broker!')
         client.subscribe(MQTT_TOPIC)
-        client.subscribe(ESP32_DATA_TOPIC)
     else:
         print(f'Failed to connect, return code {rc}')
 
