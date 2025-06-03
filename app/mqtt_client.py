@@ -17,10 +17,10 @@ django.setup()
 from app.models import CardEvent, CardUser, PersonalAttendanceSetting
 
 # Cấu hình MQTT - ĐẢM BẢO TOPIC BẮT ĐẦU BẰNG USERNAME
-MQTT_BROKER = '0c1804ec304d42579831c43b09c0c5b3.s1.eu.hivemq.cloud' 
-MQTT_PORT = 8883 
-MQTT_USERNAME = 'Taicute123'
-MQTT_PASSWORD = 'Tai123123'
+MQTT_BROKER = os.environ.get('MQTT_BROKER', '0c1804ec304d42579831c43b09c0c5b3.s1.eu.hivemq.cloud')
+MQTT_PORT = int(os.environ.get('MQTT_PORT', 8883))
+MQTT_USERNAME = os.environ.get('MQTT_USERNAME', 'Taicute123')
+MQTT_PASSWORD = os.environ.get('MQTT_PASSWORD', 'Tai123123')
 
 # Sửa các topic theo đúng định dạng
 BASE_TOPIC = f"{MQTT_USERNAME}/"
@@ -69,33 +69,14 @@ def on_message(client, userdata, msg):
                 }
             )
             
-            # Xử lý trạng thái điểm danh
-            now = timezone.localtime()
-            today = now.date()
-            setting = PersonalAttendanceSetting.objects.filter(
-                user=card_user.user, 
-                date=today
-            ).first()
-            
-            status = "Không có cấu hình"
-            if setting:
-                checkin_dt = datetime.combine(today, setting.checkin_time)
-                now_naive = now.replace(tzinfo=None)
-                
-                if now_naive < checkin_dt:
-                    status = "sớm"
-                elif now_naive > checkin_dt:
-                    status = "trễ"
-                else:
-                    status = "đúng giờ"
-            
-            # Gửi trạng thái về ESP32
+            # Gửi trạng thái về ESP32: chỉ cần "tồn tại"
+            status = "tồn tại"
             publish_message(ESP32_STATUS_TOPIC, status)
             print(f"Sent status: {status}")
             
         except CardUser.DoesNotExist:
             print(f"User not found: {card_id}")
-            publish_message(ESP32_STATUS_TOPIC, "người dùng không tồn tại")
+            publish_message(ESP32_STATUS_TOPIC, "không tồn tại")
         except Exception as e:
             print(f"Error: {e}")
             publish_message(ESP32_STATUS_TOPIC, "lỗi hệ thống")
