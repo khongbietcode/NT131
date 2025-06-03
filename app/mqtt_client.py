@@ -68,6 +68,7 @@ def on_message(client, userdata, msg):
                     }
                 }
             )
+            print(f"Đã gửi thông tin đến websocket: card_id={card_id}, user_name={user_name}")
             
             # Gửi trạng thái về ESP32: chỉ cần "tồn tại"
             status = "tồn tại"

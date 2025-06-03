@@ -13,6 +13,8 @@ from django.core.mail import send_mail
 import secrets
 import string
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+import json
 
 
 
@@ -343,3 +345,20 @@ def edit_personal_attendance_setting(request, setting_id):
 def my_attendance_settings(request):
     settings = PersonalAttendanceSetting.objects.filter(user=request.user).order_by('-date')
     return render(request, 'app/my_attendance_settings.html', {'settings': settings})
+
+@csrf_exempt
+def create_event_api(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            card_id = data.get("card_id")
+            user_name = data.get("user_name")
+            status = data.get("status", "")
+
+            # Tìm user theo card_id
+            card_user = CardUser.objects.select_related('user').get(card_id=card_id)
+            event = CardEvent.objects.create(card_id=card_id, user=card_user.user, status=status)
+            return JsonResponse({"success": True, "event_id": event.id})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+    return JsonResponse({"success": False, "error": "Invalid method"})

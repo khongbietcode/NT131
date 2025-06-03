@@ -60,19 +60,27 @@
         const data = JSON.parse(event.data);
         console.log("📡 Dữ liệu realtime:", data);
 
-        const tableBody = document.querySelector("table tbody");
-
-        const newRow = document.createElement("tr");
-
-        newRow.innerHTML = `
-            <td>${data.card_id || 'N/A'}</td>
-            <td>${data.user_name || 'Unknown User'}</td>
-            <td>${new Date().toLocaleString('vi-VN')}</td>
-            <td>${data.status || 'N/A'}</td>
-        `;
-                    
-        
-        tableBody.prepend(newRow);
+        // Gửi dữ liệu lên server để lưu vào database
+        fetch("/api/create_event/", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(data)
+        }).then(res => res.json()).then(resp => {
+            if (resp.success) {
+                // Nếu lưu thành công, cập nhật bảng như cũ
+                const tableBody = document.querySelector("table tbody");
+                const newRow = document.createElement("tr");
+                newRow.innerHTML = `
+                    <td>${data.card_id || 'N/A'}</td>
+                    <td>${data.user_name || 'Unknown User'}</td>
+                    <td>${new Date().toLocaleString('vi-VN')}</td>
+                    <td>${data.status || 'N/A'}</td>
+                `;
+                tableBody.prepend(newRow);
+            } else {
+                alert("Lỗi lưu dữ liệu: " + resp.error);
+            }
+        });
     };
 
     socket.onerror = function(error) {
@@ -80,4 +88,4 @@
     };
     </script>
 </body>
-</html> 
+</html>

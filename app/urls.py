@@ -20,4 +20,5 @@ urlpatterns = [
     path('edit-personal-attendance-setting/<int:setting_id>/', views.edit_personal_attendance_setting, name='edit_personal_attendance_setting'),
     path('delete-personal-attendance-setting/<int:setting_id>/', views.delete_personal_attendance_setting, name='delete_personal_attendance_setting'),
     path('my-attendance-settings/', views.my_attendance_settings, name='my_attendance_settings'),
+    path('api/create_event/', views.create_event_api, name='create_event_api'),
 ]
